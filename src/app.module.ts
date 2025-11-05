@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/models/user.entity';
-import { Product } from './products/product.entity';
+import { Product } from './products/models/product.entity';
 import { UserProduct } from './userProduct/userProduct.entity';
 import { UserModule } from './users/user.module';
+import { ProductModule } from './products/product.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 

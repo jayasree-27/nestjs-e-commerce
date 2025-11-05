@@ -15,4 +15,12 @@ export class UserService {
   createUser(user: CreateUserDto) {
     return this.userRepo.createUser(user);
   }
+
+  findAllUsers(){
+    return this.userRepo.findAll();
+  }
+
+  findUserById(id:number){
+    return this.userRepo.findById(id)
+  }
 }

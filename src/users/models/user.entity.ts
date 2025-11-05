@@ -3,7 +3,6 @@ import { UpdateDateColumn,Column, CreateDateColumn, Entity, PrimaryGeneratedColu
 export enum UserRole {
   ADMIN = 'admin',
   USER = 'user',
-  CUSTOMER = 'customer',
 }
 
 @Entity('users')
@@ -50,4 +49,5 @@ export class User {
 
     @UpdateDateColumn()
     updated_at: Date;
+    
 }
