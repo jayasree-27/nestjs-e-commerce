@@ -1,4 +1,4 @@
-import { Controller, Post, Body, ConflictException, Get, Param } from "@nestjs/common";
+import { Controller, Post, Body, ConflictException, Get, Param, Patch, Delete } from "@nestjs/common";
 import { CreateUserDto } from "../dtos/createUser.dto";
 import { UserService } from "../services/user.service";
 import * as bcrypt from 'bcryptjs';
@@ -6,6 +6,8 @@ import * as jwt from 'jsonwebtoken';
 import { UserRole } from "../models/user.entity";
 import { LoginUserDto } from "../dtos/loginUser.dto";
 import { UnauthorizedException } from '@nestjs/common';
+import { UpdateUserDto } from "../dtos/updateUser.dto";
+import { NotFoundException } from '@nestjs/common';
 
 @Controller("users")
 export class UserController {
@@ -85,8 +87,39 @@ export class UserController {
     }
 
     @Get(":id")
-    getUserById(@Param('id')id: number) {
+    getUserById(@Param('id') id: number) {
         return this.userService.findUserById(id);
     }
+
+    @Patch(':id')
+    async updateUser(
+        @Param('id') id: number,
+        @Body() user: UpdateUserDto,
+    ) {
+        const result = await this.userService.updateUser(id, user);
+
+        if (!result) {
+            throw new NotFoundException(`User with ID ${id} not found`);
+        }
+
+        return {
+            message: 'User updated successfully ',
+            data: result
+        };
+    }
+
+    @Delete(':id')
+    async deleteUser(@Param('id') id: number) {
+        const deleted = await this.userService.deleteUser(id);
+
+        if (!deleted) {
+            throw new NotFoundException(`User with ID ${id} not found`);
+        }
+
+        return {
+            message: 'User deleted successfully',
+        };
+    }
+
 
 }
