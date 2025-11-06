@@ -26,7 +26,7 @@ export class UserController {
         const createdUser = await this.userService.createUser({
             ...newUser,
             password: hashedPassword,
-            role: UserRole.USER
+            role: newUser.role || UserRole.USER
         });
 
         const token = jwt.sign(
