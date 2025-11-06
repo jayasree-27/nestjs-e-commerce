@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/models/user.entity';
-import { Product } from './products/models/product.entity';
 import { UserProduct } from './userProduct/userProduct.entity';
 import { UserModule } from './users/user.module';
-import { ProductModule } from './products/product.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 
@@ -22,7 +20,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
-        entities: [User, Product, UserProduct],
+        entities: [User, UserProduct],
         synchronize: config.get<boolean>('DB_SYNC'),
       })
     })],
