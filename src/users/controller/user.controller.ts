@@ -8,6 +8,9 @@ import { LoginUserDto } from "../dtos/loginUser.dto";
 import { UnauthorizedException } from '@nestjs/common';
 import { UpdateUserDto } from "../dtos/updateUser.dto";
 import { NotFoundException } from '@nestjs/common';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { UseGuards } from '@nestjs/common';
+import { Req } from '@nestjs/common';
 
 @Controller("users")
 export class UserController {
@@ -81,10 +84,12 @@ export class UserController {
         };
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get()
-    getAllUsers() {
-        return this.userService.findAllUsers();
+    getAllUsers(@Req() req: any) {
+        return this.userService.findAllUsers(req.user);
     }
+
 
     @Get(":id")
     getUserById(@Param('id') id: number) {

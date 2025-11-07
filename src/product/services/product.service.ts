@@ -12,19 +12,25 @@ export class ProductService {
         private userRepo: UserRepository
     ) { }
     async createProduct(userPayload: any, dto: CreateProductDto) {
-    // Fetch full User entity from DB
-    const userId = Number(userPayload.id);
-    const user = await this.userRepo.findById(userId );
-    if (!user) throw new ForbiddenException('User not found');
-    return this.productRepo.create(user, dto);
-  }
+        // Fetch full User entity from DB
+        const userId = Number(userPayload.id);
+        const user = await this.userRepo.findById(userId);
+        if (!user) throw new ForbiddenException('User not found');
+        return this.productRepo.create(user, dto);
+    }
 
     async getProducts(loggedUser: User) {
-    if (loggedUser.role === 'admin') {
-      return await this.productRepo.findAll();
-    } else {
-      return await this.productRepo.findByUserId(loggedUser.id);
+        if (loggedUser.role === 'admin') {
+            return await this.productRepo.findAll();
+        } else {
+            return await this.productRepo.findByUserId(loggedUser.id);
+        }
     }
-  }
+
+    async getProductsByUser(userId: number) {
+        return await this.productRepo.findByUserId(userId);
+    }
+
+
 
 }

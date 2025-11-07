@@ -8,11 +8,11 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 export class ProductController {
     constructor(private productService: ProductService) { }
 
-@UseGuards(JwtAuthGuard)
-  @Post()
-  create(@Req() req, @Body() dto: CreateProductDto) {
-    return this.productService.createProduct(req.user, dto);
-  }
+    @UseGuards(JwtAuthGuard)
+    @Post()
+    create(@Req() req, @Body() dto: CreateProductDto) {
+        return this.productService.createProduct(req.user, dto);
+    }
 
     @UseGuards(JwtAuthGuard)
     @Get()
@@ -20,11 +20,22 @@ export class ProductController {
         try {
             console.log("user", req.user);
             return await this.productService.getProducts(req.user);
-           
+
         }
         catch (err) {
             console.log("error", err);
         }
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('user/:id')
+    async getProductsByUser(@Param('id') id: number, @Req() req: any) {
+        if (req.user.role !== 'admin' && req.user.id !== Number(id)) {
+            throw new ForbiddenException('You are not allowed to view others products');
+        }
+        return this.productService.getProductsByUser(Number(id));
+    }
+
+
 
 }

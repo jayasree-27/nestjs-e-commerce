@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { CreateUserDto } from "../dtos/createUser.dto";
 import { UserRepository } from "../repositories/user.repository";
 import { UpdateUserDto } from "../dtos/updateUser.dto";
+import { ForbiddenException } from '@nestjs/common';
 
 @Injectable()
 export class UserService {
@@ -17,9 +18,14 @@ export class UserService {
         return this.userRepo.createUser(user);
     }
 
-    findAllUsers() {
-        return this.userRepo.findAll();
+    async findAllUsers(loggedUser: any) {
+    if (loggedUser.role !== 'admin') {
+      throw new ForbiddenException('Only Admin can view all users!');
     }
+
+    return this.userRepo.findAll();
+  }
+
 
     findUserById(id: number) {
         return this.userRepo.findById(id)
