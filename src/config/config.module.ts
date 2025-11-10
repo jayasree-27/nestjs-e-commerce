@@ -1,17 +1,11 @@
-// src/config/config.module.ts
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import appConfig from './app.config';
-import databaseConfig from './database.config';
-import envValidation from './env.validation';
-
+import { Global, Module } from '@nestjs/common';
+import { configProviders } from './config.providers';
+import { AppConfig } from './app.config';
+import { DatabaseConfig } from './database.config';
+@Global()
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [appConfig, databaseConfig],
-      validationSchema: envValidation,
-    }),
-  ],
+  imports: [],
+  providers: [...configProviders, DatabaseConfig, AppConfig],
+  exports: [...configProviders, DatabaseConfig, AppConfig],
 })
-export class configModule {}
+export class ConfigModule {}

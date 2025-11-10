@@ -1,0 +1,12 @@
+app:
+  name: ecommerce
+  environment: development
+  port: 8000
+
+database:
+  host: localhost
+  port: 5432
+  username: postgres
+  password: 'jayasree275'
+  name: nestjs_ecommerce
+  synchronize: true
