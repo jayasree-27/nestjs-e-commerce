@@ -24,6 +24,10 @@ interface LoadedConfigSchema {
     name: string;
     synchronize: boolean;
   };
+  redis?: {
+    host: string;
+    port: number;
+  };
   [key: string]: any;
 }
 

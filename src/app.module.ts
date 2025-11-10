@@ -7,10 +7,12 @@ import { Product } from './product/models/product.entity';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseConfig } from './config/database.config';
 import { ConfigModule } from './config/config.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
     ConfigModule,
+    CacheModule.register({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       inject: [DatabaseConfig],
       useFactory: (dbConfig: DatabaseConfig) => {
@@ -33,5 +35,6 @@ import { ConfigModule } from './config/config.module';
   ],
   controllers: [],
   providers: [],
+  exports: [],
 })
-export class AppModule {}
+export class AppModule { }

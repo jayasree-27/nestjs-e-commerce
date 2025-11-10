@@ -10,3 +10,7 @@ database:
   password: Jayasree275
   name: nestjs_ecommerce
   synchronize: true
+
+reddis:
+  host: localhost
+  port: 6379
