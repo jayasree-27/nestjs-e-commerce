@@ -17,11 +17,11 @@ import { ConfigModule } from './config/config.module';
         console.log(dbConfig);
         return {
           type: 'postgres',
-          host: 'localhost',
-          port: 5432,
-          username: 'postgres',
-          password: 'jayasree275',
-          database: 'nestjs_ecommerce',
+          host: dbConfig.host,
+          port: dbConfig.port,
+          username: dbConfig.username,
+          password: dbConfig.password,
+          database: dbConfig.name,
           entities: [User, Product],
           synchronize: true,
         };
