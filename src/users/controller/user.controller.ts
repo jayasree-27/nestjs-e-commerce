@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Delete,
+  Options,
 } from '@nestjs/common';
 import { CreateUserDto } from '../dtos/createUser.dto';
 import { UserService } from '../services/user.service';
@@ -20,6 +21,7 @@ import { NotFoundException } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { Req } from '@nestjs/common';
+import { Throttle } from '../../auth/guards/throttle-redis.guard';
 
 @Controller('users')
 export class UserController {
@@ -53,6 +55,7 @@ export class UserController {
       user: {
         id: createdUser.id,
         email: createdUser.email,
+        password: createdUser.password,
         role: createdUser.role,
         firstName: createdUser.first_name,
         lastName: createdUser.last_name,
@@ -97,11 +100,13 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
+  @Throttle(2, 60) // Limit to 2 requests per minute
   getAllUsers(@Req() req: any) {
     return this.userService.findAllUsers(req.user);
   }
 
   @Get(':id')
+  @Throttle(12, 60)
   getUserById(@Param('id') id: number) {
     return this.userService.findUserById(id);
   }

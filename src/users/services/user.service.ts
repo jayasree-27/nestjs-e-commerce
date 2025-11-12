@@ -3,65 +3,75 @@ import { CreateUserDto } from '../dtos/createUser.dto';
 import { UserRepository } from '../repositories/user.repository';
 import { UpdateUserDto } from '../dtos/updateUser.dto';
 import { ForbiddenException } from '@nestjs/common';
-import { CACHE_MANAGER, Cache} from '@nestjs/cache-manager';
 import { User } from '../models/user.entity';
+import { RedisStorage } from '../../infrastruxture/database/redis/redis.storage';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepo: UserRepository,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly redis: RedisStorage, // ✅ now Nest can inject it
   ) {}
 
   async findUserByEmail(email: string): Promise<User | null> {
     const cacheKey = `user_email_${email}`;
-    const cached = await this.cacheManager.get(cacheKey);
+    const cached = await this.redis.get<User>(cacheKey);
+
     if (cached) {
-      console.log('cache hit');
-      return cached as User;
+      console.log('✅ Cache Hit (Email)');
+      return cached;
     }
+
     const user = await this.userRepo.findByEmail(email);
-    if (user) await this.cacheManager.set(cacheKey, user); // cache 5 min
+    if (user) await this.redis.set(cacheKey, user, 300);
+
     return user;
   }
 
   async createUser(user: CreateUserDto) {
     const newUser = await this.userRepo.createUser(user);
-    // optionally cache by email/id
-    await this.cacheManager.set(`user_email_${newUser.email}`, newUser);
-    await this.cacheManager.set(`user_id_${newUser.id}`, newUser);
+
+    await this.redis.set(`user_email_${newUser.email}`, newUser, 300);
+    await this.redis.set(`user_id_${newUser.id}`, newUser, 300);
+
     return newUser;
   }
 
-  async findAllUsers(loggedUser: any) {
+  async findAllUsers(loggedUser: any): Promise<User[]> {
     if (loggedUser.role !== 'admin') {
       throw new ForbiddenException('Only Admin can view all users!');
     }
 
     const cacheKey = 'all_users';
-    const cached = await this.cacheManager.get(cacheKey);
+    const cached = await this.redis.get<User[]>(cacheKey);
+
     if (cached) {
-      console.log('cache hit');
+      console.log('✅ Cache Hit (All Users)');
       return cached;
     }
+
     const users = await this.userRepo.findAll();
+
     if (users) {
-      await this.cacheManager.set(cacheKey, users);
+      await this.redis.set(cacheKey, users, 300);
+      console.log('✅ Cached all users in Redis');
     }
+
     return users;
   }
 
   async findUserById(id: number): Promise<User | null> {
     const cacheKey = `user_id_${id}`;
-    const cached = await this.cacheManager.get(cacheKey);
+    const cached = await this.redis.get<User>(cacheKey);
+
     if (cached) {
-      console.log('cache hit');
-      return cached as User;
+      console.log('✅ Cache Hit (ID)');
+      return cached;
     }
+
     const user = await this.userRepo.findById(id);
-    if (user) {
-      await this.cacheManager.set(cacheKey, user);
-    }
+    if (user) await this.redis.set(cacheKey, user, 300);
+
     return user;
   }
 
@@ -72,10 +82,10 @@ export class UserService {
     const updatedUser = { ...user, ...updateData };
     const saved = await this.userRepo.saveUser(updatedUser);
 
-    await this.cacheManager.set(`user_id_${id}`, saved);
-    await this.cacheManager.set(`user_email_${saved.email}`, saved);
+    await this.redis.set(`user_id_${id}`, saved, 300);
+    await this.redis.set(`user_email_${saved.email}`, saved, 300);
 
-    await this.cacheManager.del('all_users');
+    await this.redis.delete('all_users');
     return saved;
   }
 
@@ -83,9 +93,9 @@ export class UserService {
     const user = await this.userRepo.findById(id);
     if (!user) return false;
 
-    await this.cacheManager.del(`user_id_${id}`);
-    await this.cacheManager.del(`user_email_${user.email}`);
-    await this.cacheManager.del('all_users');
+    await this.redis.delete(`user_id_${id}`);
+    await this.redis.delete(`user_email_${user.email}`);
+    await this.redis.delete('all_users');
 
     return true;
   }

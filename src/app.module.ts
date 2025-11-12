@@ -8,11 +8,25 @@ import { AuthModule } from './auth/auth.module';
 import { DatabaseConfig } from './config/database.config';
 import { ConfigModule } from './config/config.module';
 import { CacheModule } from '@nestjs/cache-manager';
-
+import { RedisConfig } from './config/redis.config';
+import * as redisStore from 'cache-manager-redis-store';
+import { APP_GUARD } from '@nestjs/core';
+import { RedisThrottlerGuard } from './auth/guards/throttle-redis.guard';
 @Module({
   imports: [
     ConfigModule,
-    CacheModule.register({ isGlobal: true }),
+    CacheModule.registerAsync({
+      inject: [RedisConfig],
+      isGlobal: true,
+      useFactory: (redisConfig: RedisConfig) => ({
+        store: redisStore as any, // ✅ Enable Redis store here
+        socket: {
+          host: redisConfig.host,
+          port: redisConfig.port,
+        },
+      }),
+    }),
+
     TypeOrmModule.forRootAsync({
       inject: [DatabaseConfig],
       useFactory: (dbConfig: DatabaseConfig) => {
@@ -34,7 +48,12 @@ import { CacheModule } from '@nestjs/cache-manager';
     AuthModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RedisThrottlerGuard,
+    },
+  ],
   exports: [],
 })
-export class AppModule { }
+export class AppModule {}
